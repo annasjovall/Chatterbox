@@ -130,14 +130,14 @@ singleWildcardMatch (wc:ps) (x:xs)
         |ps == xs = Just [x]
         |match wc ps xs /= Nothing = Just[x]
         |otherwise = Nothing
-{- TO BE WRITTEN -}
+
+
 longerWildcardMatch (wc:ps) (x:xs)
         |droppedLength == 1 = Nothing 
         |ps == drop droppedLength (x:xs) = Just (take droppedLength (x:xs))
         |(match wc ps (drop droppedLength (x:xs))) /= Nothing = Just (take droppedLength (x:xs))
         |otherwise = Nothing
         where droppedLength = (counter 0 (wc:ps) (x:xs))
-{- TO BE WRITTEN -}
 
 --Counts the number of letters of the current wildcard
 counter :: Eq a => Int -> [a] -> [a] -> Int
@@ -166,13 +166,16 @@ matchCheck = matchTest == Just testSubstitutions
 
 -- Applying a single pattern
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply a f b (c,d) = orElse (Just (substitute a d (f (fromJust (match a c b))))) Nothing
-{- TO BE WRITTEN -}
-
+transformationApply a f b (c,d) 
+    |isNothing func = Nothing
+    |otherwise = orElse(Just (substitute a d (f (fromJust (func))))) Nothing
+    where func = match a c b
 
 -- Applying a list of patterns until one succeeds
-transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply _ _ _ _ = Nothing
-{- TO BE WRITTEN -}
 
+transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
+transformationsApply _ _ [] _ = Nothing
+transformationsApply a f ((c,d):tail) b 
+    |isJust (transformationApply a f b (c, d)) = transformationApply a f b (c, d)
+    |otherwise = transformationsApply a f tail b
 
