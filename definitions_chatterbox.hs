@@ -43,5 +43,6 @@ fix f x
 -- . function composition, start from right
 -- integral - no fractions
 -- längden blir en integral, muliplies with r, removes decimals = index ger ett element
+--frac mellan 0 och 1, ger den procenten av listan
 pick :: RealFrac r => r -> [a] -> a
 pick u xs = xs !! (floor.(u*).fromIntegral.length) xs

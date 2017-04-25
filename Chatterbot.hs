@@ -27,14 +27,16 @@ type BotBrain = [(Phrase, [Phrase])]
 --------------------------------------------------------
 
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
-{- TO BE WRITTEN -}
-stateOfMind _ = return id
+stateOfMind eliza = do
+    r <- randomIO :: IO Float
+    return (rulesApply (map (map2 (id, pick r)) eliza))
+    
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
 rulesApply tuple string
     |isNothing trans = reflect string
     |otherwise = fromJust trans
-    where trans = transformationsApply "*" id tuple (reflect string)
+    where trans = transformationsApply "*" reflect tuple string
       
 
 --lookup :: Eq a => a -> [(a, b)] -> Maybe b
@@ -78,9 +80,7 @@ prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|") 
 
 rulesCompile :: [(String, [String])] -> BotBrain
-{- TO BE WRITTEN -}
-rulesCompile _ = []
-
+rulesCompile list = map (map2 (words, (map words))) list
 
 --------------------------------------
 
@@ -123,7 +123,7 @@ substitute ch (x:xs) ys
 -- Tries to match two lists. If they match, the result consists of the sublist
 -- bound to the wildcard in the pattern list.
 match :: Eq a => a -> [a] -> [a] -> Maybe [a]
-match _ [] [] = Nothing
+match _ [] [] = Just []
 match _ [] _ = Nothing
 match _ _ [] = Nothing
 match ch (p:ps) (y:ys)
@@ -135,24 +135,10 @@ match ch (p:ps) (y:ys)
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
 singleWildcardMatch (wc:ps) (x:xs) 
-        |ps == xs = Just [x]
-        |match wc ps xs /= Nothing = Just[x]
+        |isJust (match wc ps xs) = Just [x]
         |otherwise = Nothing
 
-
-longerWildcardMatch (wc:ps) (x:xs)
-        |droppedLength == 1 = Nothing 
-        |ps == drop droppedLength (x:xs) = Just (take droppedLength (x:xs))
-        |(match wc ps (drop droppedLength (x:xs))) /= Nothing = Just (take droppedLength (x:xs))
-        |otherwise = Nothing
-        where droppedLength = (counter 0 (wc:ps) (x:xs))
-
---Counts the number of letters of the current wildcard
-counter :: Eq a => Int -> [a] -> [a] -> Int
-counter nbr a (b:bs)
-        |length a == 1 = length (b:bs)
-        |a !! 1 == b = nbr
-        |otherwise = counter (succ nbr) a bs
+longerWildcardMatch (wc:ps) (x:xs) = mmap (x:) (match wc (wc:ps) xs)
 
 -- Test cases --------------------
 
