@@ -31,12 +31,20 @@ stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 stateOfMind _ = return id
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-rulesApply _ = id
+rulesApply tuple string
+    |isNothing trans = reflect string
+    |otherwise = fromJust trans
+    where trans = transformationsApply "*" id tuple (reflect string)
+      
 
+--lookup :: Eq a => a -> [(a, b)] -> Maybe b
 reflect :: Phrase -> Phrase
-{- TO BE WRITTEN -}
-reflect = id
+reflect [] = []
+reflect (x:xs)
+    |isNothing y = x : reflect xs
+    |otherwise = [fromJust y] ++ reflect xs
+    where y = lookup x reflections
+    
 
 reflections =
   [ ("am",     "are"),
