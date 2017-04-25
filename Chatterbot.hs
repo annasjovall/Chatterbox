@@ -33,11 +33,7 @@ stateOfMind eliza = do
     
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-rulesApply tuple string
-    |isNothing trans = reflect string
-    |otherwise = fromJust trans
-    where trans = transformationsApply "*" reflect tuple string
-      
+rulesApply tuple string = try (transformationsApply "*" reflect tuple) string 
 
 --lookup :: Eq a => a -> [(a, b)] -> Maybe b
 reflect :: Phrase -> Phrase
@@ -77,10 +73,10 @@ present :: Phrase -> String
 present = unwords
 
 prepare :: String -> Phrase
-prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|") 
+prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
 rulesCompile :: [(String, [String])] -> BotBrain
-rulesCompile list = map (map2 (words, (map words))) list
+rulesCompile list = map (map2 (words . map toLower, (map words))) list
 
 --------------------------------------
 
@@ -104,9 +100,10 @@ reduce :: Phrase -> Phrase
 reduce = reductionsApply reductions
 
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-reductionsApply _ = id
-
+reductionsApply tuples string 
+    |isNothing trans = string
+    |otherwise = reductionsApply tuples (fromJust trans) 
+    where trans = transformationsApply "*" id tuples string
 
 -------------------------------------------------------
 -- Match and substitute
@@ -127,16 +124,16 @@ match _ [] [] = Just []
 match _ [] _ = Nothing
 match _ _ [] = Nothing
 match ch (p:ps) (y:ys)
-        |p == y = match ch ps ys
-        |p == ch = orElse (singleWildcardMatch (p:ps) (y:ys)) (longerWildcardMatch (p:ps) (y:ys))
-        |otherwise = Nothing
+    |p == y = match ch ps ys
+    |p == ch = orElse (singleWildcardMatch (p:ps) (y:ys)) (longerWildcardMatch (p:ps) (y:ys))
+    |otherwise = Nothing
 
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
 singleWildcardMatch (wc:ps) (x:xs) 
-        |isJust (match wc ps xs) = Just [x]
-        |otherwise = Nothing
+    |isJust (match wc ps xs) = Just [x]
+    |otherwise = Nothing
 
 longerWildcardMatch (wc:ps) (x:xs) = mmap (x:) (match wc (wc:ps) xs)
 

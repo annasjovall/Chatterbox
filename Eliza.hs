@@ -204,7 +204,7 @@ eliza = [
        "Thank you, that will be $150.  Have a good day!"]),
 
   ("*",
-      ["Please tell me more.",
+      ["Please tell me more.",	
        "Let's change focus a bit... Tell me about your family.",
        "Can you elaborate on that?",
        "Why do you say that * ?",

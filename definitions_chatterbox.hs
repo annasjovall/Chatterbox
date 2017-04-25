@@ -1,3 +1,4 @@
+
 --map over a tuple, function 1 maps over x1 (kan vara lista). 
 --ex:  map2 ((++ "!"), (++ "A")) ("anna","panna")
 -- = ("anna!","pannaA")
@@ -45,4 +46,4 @@ fix f x
 -- längden blir en integral, muliplies with r, removes decimals = index ger ett element
 --frac mellan 0 och 1, ger den procenten av listan
 pick :: RealFrac r => r -> [a] -> a
-pick u xs = xs !! (floor.(u*).fromIntegral.length) xs
+pick u xs = xs !! (floor.(u*).fromIntegral.length) xsk
